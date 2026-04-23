@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>사이버 가챠 머신</title>
+    <title>사이버-자칼-가챠머신</title>
     <style>
         body {
             display: flex;
@@ -51,6 +51,7 @@
             opacity: 0;
         }
 
+        /* 섞이는 애니메이션 */
         @keyframes bounce {
             0%, 100% { transform: translate(0, 0) rotate(0deg); }
             25% { transform: translate(150px, 50px) rotate(90deg); }
@@ -71,7 +72,7 @@
             z-index: 10;
             pointer-events: auto;
             cursor: pointer;
-            transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+            transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
             transform-origin: center center; 
             left: 102px; top: 409px;  
             width: 90px; height: 91px;
@@ -94,30 +95,84 @@
             object-fit: cover;
         }
 
-        /* 당첨 캡슐 결과창 (시작 위치 수정) */
+        /* 당첨 캡슐 결과창 */
         .result-capsule {
             position: absolute;
             z-index: 100;
             width: 60px; height: 60px;
-            /* 캡슐이 나오는 구멍의 위치로 시작점 세팅 */
-            left: 260px; 
+            left: 80px; 
             top: 540px; 
             display: none;
             transform-origin: center center;
         }
 
-        /* 데굴데굴 굴러나오는 애니메이션 (도착 위치 수정) */
+        /* 데굴데굴 속도 업그레이드! (1.2s -> 0.8s) */
         @keyframes rollOut {
-            /* 1. 구멍 안 (보이지 않다가 튀어나옴) */
             0% { transform: scale(0.5) translate(0, 0) rotate(0deg); opacity: 0; }
-            /* 2. 구멍에서 바닥으로 툭 떨어짐 */
-            20% { transform: scale(1.2) translate(0px, 70px) rotate(-120deg); opacity: 1; }
-            /* 3. 왼쪽(캡쳐하신 넓은 영역)을 향해 통통 튀어감 */
-            45% { transform: scale(1.2) translate(-40px, 50px) rotate(-200deg); }
-            65% { transform: scale(1.2) translate(-80px, 80px) rotate(-280deg); }
-            85% { transform: scale(1.2) translate(-110px, 70px) rotate(-320deg); }
-            /* 4. 캡쳐하신 영역 한가운데 안착 */
-            100% { transform: scale(1.2) translate(-130px, 80px) rotate(-360deg); opacity: 1; }
+            15% { transform: scale(1.2) translate(-10px, 80px) rotate(-90deg); opacity: 1; } 
+            35% { transform: scale(1.2) translate(-35px, 50px) rotate(-180deg); } 
+            55% { transform: scale(1.2) translate(-70px, 80px) rotate(-360deg); } 
+            100% { transform: scale(1.2) translate(-130px, 80px) rotate(-720deg); opacity: 1; } 
+        }
+
+        /* 모달 스타일 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            position: relative;
+            background: #fff;
+            padding: 10px;
+            border-radius: 15px;
+            max-width: 85%;
+            max-height: 85%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 75vh;
+            border-radius: 10px;
+            display: block;
+        }
+
+        /* 수정한 세련된 닫기 버튼 */
+        .close-btn {
+            position: absolute;
+            top: -18px;
+            right: -18px;
+            width: 36px;
+            height: 36px;
+            background-color: #333;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 2px solid #fff;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+            background-color: #000;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
@@ -134,13 +189,74 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="result-modal">
+        <div class="modal-content">
+            <div class="close-btn" id="close-modal">✕</div>
+            <img id="final-gacha-img" src="" alt="당첨 이미지">
+        </div>
+    </div>
+
     <script>
         const handle = document.getElementById('handle');
         const capsuleBox = document.getElementById('capsule-box');
         const resultImg = document.getElementById('result-img');
+        const resultModal = document.getElementById('result-modal');
+        const finalGachaImg = document.getElementById('final-gacha-img');
+        const closeModalBtn = document.getElementById('close-modal');
 
         const capsuleImages = Array.from({length: 9}, (_, i) => `https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/main/img/gc${i+1}.png`);
         
+        const finalImages = [
+            "https://drive.google.com/uc?export=view&id=1b_WYpHZNqOLHQqgJVqqgzkXQDefvMXti",
+            "https://drive.google.com/uc?export=view&id=1md7GnMHtDoxI-R6KT6cG0jQxpV85Q_MT",
+            "https://drive.google.com/uc?export=view&id=1fBQCPPxnrQFnN6ws7LCIj2M0riogllFu",
+            "https://drive.google.com/uc?export=view&id=13wHLRnB79QVp6TCTQMr8ClmL5lpy98uw",
+            "https://drive.google.com/uc?export=view&id=1uXFyUMcEOwrKBxQNkjPsasY-rOaLao_k",
+            "https://drive.google.com/uc?export=view&id=1hPTyXMA0A2BXCCYAAoLlsClaQZdZyHJD",
+            "https://drive.google.com/uc?export=view&id=1QvAtvNIrdBgWpp3Bf4aJXCr_-7YabhoQ",
+            "https://drive.google.com/uc?export=view&id=1sWDSKd-7-k5mRPOMCo7YQ_XZrK9syLE6",
+            "https://drive.google.com/uc?export=view&id=1yzjxMEG02jfT_PlV4pIqVycYKYDfM_c9",
+            "https://drive.google.com/uc?export=view&id=15jdV1dayHI0ngJkP5YaKBhRxYK1TeHze",
+            "https://drive.google.com/uc?export=view&id=1iSnxGNDHDcVk940YzGGnOg7ooMuKFF_n",
+            "https://drive.google.com/uc?export=view&id=1Fh51ayBNNovEeiA2QGZX3pWsAqBxqIyz",
+            "https://drive.google.com/uc?export=view&id=1zNSMBbq8yOxfOYTcV2P1IBxmwU6hBA0W",
+            "https://drive.google.com/uc?export=view&id=1mRFQp41nkw5nsl4TFCyfCmpnVgYe4DmP",
+            "https://drive.google.com/uc?export=view&id=1GYtsOeDcmcHEOn9RWZXd6ySA9vs5U_SE",
+            "https://drive.google.com/uc?export=view&id=1wMfppAWD_WBQ0yOIQ9t1SvXw9etU6J9Q",
+            "https://drive.google.com/uc?export=view&id=1dfxKHaENPdhb6DFPg-CTvLLxZhV8iBY7",
+            "https://drive.google.com/uc?export=view&id=1VgjGHGBWWMgJiN9KxzFJuOPx4vrYm3DW",
+            "https://drive.google.com/uc?export=view&id=14EoHcub8CJl5oUxVmXBzrYbEX5gJZ_MV",
+            "https://drive.google.com/uc?export=view&id=14VCs7NG5XMm3MQTDfSDG-pSDv9bWjaEI",
+            "https://drive.google.com/uc?export=view&id=1FEYpEzHHGqGtojAZFX9MNzzOsGi-XANg",
+            "https://drive.google.com/uc?export=view&id=1RZJ2DRw1EcL69b7E3QVVbztE-470A1Wp",
+            "https://drive.google.com/uc?export=view&id=1BINXxVYTaglQEUz_hd93YIE2QMiRbJvq",
+            "https://drive.google.com/uc?export=view&id=1WzAA60T6g3qP_XXOgfkW9kkL2L_cVds0",
+            "https://drive.google.com/uc?export=view&id=1G9bQDxQ6ocMIbFf4eSxTFpPk6Nds3X0F",
+            "https://drive.google.com/uc?export=view&id=12Y9g67-stWWQ3zVsA5vhLUzzdfpcp9qp",
+            "https://drive.google.com/uc?export=view&id=1jF-qEQ7MjOLnR6NyLrITrFCAuQOc9zaF",
+            "https://drive.google.com/uc?export=view&id=1737hyvp7rJN18ARK9prubbj9cUm2h4gc",
+            "https://drive.google.com/uc?export=view&id=1AIJIfY5LzDBFbcMFeN18TZNNP5nnpZyh",
+            "https://drive.google.com/uc?export=view&id=1c2cT-4qZ1Mq4u7D-Om-W9tARwNpFjzEx",
+            "https://drive.google.com/uc?export=view&id=18tf8Li3RelTFTjJJ89-cgDmDbDJJmRNx",
+            "https://drive.google.com/uc?export=view&id=1OI-dU6F6nzhgKc3tfNt1oewPi_JMfgEX",
+            "https://drive.google.com/uc?export=view&id=1qMe4I44rRICCAAj2DGSrBhvss2nHCvY1",
+            "https://drive.google.com/uc?export=view&id=1H5GSQdEYLRSKiWwxgOEXw9JwgSe6jjPR",
+            "https://drive.google.com/uc?export=view&id=1lUlcS55tNJ3Z9HQ2a5es4LucFB6ez9Xv",
+            "https://drive.google.com/uc?export=view&id=1ybot0zJY9St6FMAnblZyL7fP_4j44dtM",
+            "https://drive.google.com/uc?export=view&id=1PRuLf-x0OtBPO58kBMdhMZgNfu_hzabt",
+            "https://drive.google.com/uc?export=view&id=1nMKIEns7LqiFZ8_h3BmO55qEZG61G0eE",
+            "https://drive.google.com/uc?export=view&id=1CEC20GSXCbsQBRaazs3HXoyHq3IGun67",
+            "https://drive.google.com/uc?export=view&id=1w5EzcPg82O0vt61AV0c66wshMVsn6lMP",
+            "https://drive.google.com/uc?export=view&id=1ZOXuf21YeYkR58rBzN3Oh3NNPj1ilAOS",
+            "https://drive.google.com/uc?export=view&id=1xsd2heo257BynmXrdNuF8bNDawZ5PBAB",
+            "https://drive.google.com/uc?export=view&id=1TDdQUlQX2z65BlfSYDvNhOByDBOTOFgr",
+            "https://drive.google.com/uc?export=view&id=1cwk79kPIlC_5R9fuPjy1OT9tTvUYw_cE",
+            "https://drive.google.com/uc?export=view&id=1pFIafuWUWeyZ8iJSzJo84UAbZGHWEJJw",
+            "https://drive.google.com/uc?export=view&id=1e6mD-59M-1hslZ6cRoTYTNeMzn2GV8Wu",
+            "https://drive.google.com/uc?export=view&id=1BYV8wQSNC7hoZGfWv00SrIpUQeLiW-dd",
+            "https://drive.google.com/uc?export=view&id=1i8nloMC1347Aub1rLRxmZegmKIihxv5-"
+        ];
+
         let isSpinning = false;
 
         function initCapsules() {
@@ -156,6 +272,16 @@
         }
         initCapsules();
 
+        closeModalBtn.addEventListener('click', () => {
+            resultModal.style.display = 'none';
+        });
+
+        resultModal.addEventListener('click', (e) => {
+            if(e.target === resultModal) {
+                resultModal.style.display = 'none';
+            }
+        });
+
         handle.addEventListener('click', () => {
             if (isSpinning) return;
             isSpinning = true;
@@ -165,9 +291,10 @@
             const capsules = document.querySelectorAll('.shuffling-capsule');
             capsules.forEach((cap) => {
                 cap.style.opacity = '1';
-                cap.style.animation = `bounce ${0.4 + Math.random() * 0.2}s infinite alternate`;
+                cap.style.animation = `bounce ${0.1 + Math.random() * 0.1}s infinite alternate`;
             });
 
+            // 0.6초 후 섞기 중단
             setTimeout(() => {
                 handle.classList.remove('spin');
                 
@@ -180,16 +307,30 @@
                 resultImg.src = capsuleImages[winIdx];
                 resultImg.style.display = 'block';
                 
-                resultImg.style.animation = 'rollOut 1.2s ease-out forwards';
+                // 굴러나오는 애니메이션 시간 0.8s
+                resultImg.style.animation = 'rollOut 0.8s ease-out forwards';
 
+                // 0.8초 후 결과 이미지 팝업
                 setTimeout(() => {
                     isSpinning = false;
-                    alert('가챠 성공!');
                     resultImg.style.display = 'none';
                     resultImg.style.animation = 'none';
-                }, 1500);
 
-            }, 2000);
+                    const randomFinalIdx = Math.floor(Math.random() * finalImages.length);
+                    const originalUrl = finalImages[randomFinalIdx];
+                    const idMatch = originalUrl.match(/id=([^&]+)/);
+                    let safeImageUrl = originalUrl;
+                    
+                    if (idMatch && idMatch[1]) {
+                        safeImageUrl = `https://drive.google.com/thumbnail?id=${idMatch[1]}&sz=w800`;
+                    }
+
+                    finalGachaImg.src = safeImageUrl;
+                    resultModal.style.display = 'flex';
+
+                }, 850); 
+
+            }, 600); 
         });
     </script>
 </body>
