@@ -106,7 +106,7 @@
             transform-origin: center center;
         }
 
-        /* 데굴데굴 속도 업그레이드! (1.2s -> 0.8s) */
+        /* 데굴데굴 속도 업그레이드! */
         @keyframes rollOut {
             0% { transform: scale(0.5) translate(0, 0) rotate(0deg); opacity: 0; }
             15% { transform: scale(1.2) translate(-10px, 80px) rotate(-90deg); opacity: 1; } 
@@ -145,7 +145,6 @@
             display: block;
         }
 
-        /* 수정한 세련된 닫기 버튼 */
         .close-btn {
             position: absolute;
             top: -18px;
@@ -203,6 +202,28 @@
         const resultModal = document.getElementById('result-modal');
         const finalGachaImg = document.getElementById('final-gacha-img');
         const closeModalBtn = document.getElementById('close-modal');
+
+// --- 오디오 설정 (딜레이 보정 버전) ---
+        const clickSounds = [
+            {
+                audio: new Audio('https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/img/mousses-clikes.mp3'),
+                startTime: 0 // 이 파일은 바로 시작
+            },
+            {
+                audio: new Audio('https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/img/mouse-click-sound.mp3'),
+                startTime: 1.0 // 앞의 1초 공백을 건너뛰고 1초 지점부터 재생
+            }
+        ];
+
+        function playRandomClick() {
+            const randomIdx = Math.floor(Math.random() * clickSounds.length);
+            const selected = clickSounds[randomIdx];
+            const sound = selected.audio;
+
+            // 설정된 시작 시간으로 이동 후 재생
+            sound.currentTime = selected.startTime; 
+            sound.play().catch(e => console.log("오디오 재생 실패:", e));
+        }
 
         const capsuleImages = Array.from({length: 9}, (_, i) => `https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/main/img/gc${i+1}.png`);
         
@@ -286,6 +307,9 @@
             if (isSpinning) return;
             isSpinning = true;
 
+            // 딸깍 소리 재생!
+            playRandomClick();
+
             handle.classList.add('spin');
             
             const capsules = document.querySelectorAll('.shuffling-capsule');
@@ -294,7 +318,6 @@
                 cap.style.animation = `bounce ${0.1 + Math.random() * 0.1}s infinite alternate`;
             });
 
-            // 0.6초 후 섞기 중단
             setTimeout(() => {
                 handle.classList.remove('spin');
                 
@@ -306,11 +329,8 @@
                 const winIdx = Math.floor(Math.random() * 9);
                 resultImg.src = capsuleImages[winIdx];
                 resultImg.style.display = 'block';
-                
-                // 굴러나오는 애니메이션 시간 0.8s
                 resultImg.style.animation = 'rollOut 0.8s ease-out forwards';
 
-                // 0.8초 후 결과 이미지 팝업
                 setTimeout(() => {
                     isSpinning = false;
                     resultImg.style.display = 'none';
