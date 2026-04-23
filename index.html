@@ -94,24 +94,30 @@
             object-fit: cover;
         }
 
-        /* 당첨 캡슐 결과창 (수정됨) */
+        /* 당첨 캡슐 결과창 (시작 위치 수정) */
         .result-capsule {
             position: absolute;
             z-index: 100;
             width: 60px; height: 60px;
-            left: 175px; top: 560px; /* 배출구 위치 미세 조정 */
+            /* 캡슐이 나오는 구멍의 위치로 시작점 세팅 */
+            left: 260px; 
+            top: 540px; 
             display: none;
-            transform-origin: center center; /* 회전축을 중앙으로 설정 */
+            transform-origin: center center;
         }
 
-        /* 데굴데굴 굴러나오는 애니메이션 (수정됨) */
+        /* 데굴데굴 굴러나오는 애니메이션 (도착 위치 수정) */
         @keyframes rollOut {
+            /* 1. 구멍 안 (보이지 않다가 튀어나옴) */
             0% { transform: scale(0.5) translate(0, 0) rotate(0deg); opacity: 0; }
-            20% { transform: scale(1.2) translate(-10px, 60px) rotate(-120deg); opacity: 1; } /* 툭 떨어짐 */
-            45% { transform: scale(1.2) translate(-25px, 40px) rotate(-200deg); } /* 바닥 맞고 첫 번째 튕김 */
-            65% { transform: scale(1.2) translate(-40px, 70px) rotate(-280deg); } /* 다시 떨어짐 */
-            85% { transform: scale(1.2) translate(-50px, 60px) rotate(-320deg); } /* 작게 두 번째 튕김 */
-            100% { transform: scale(1.2) translate(-60px, 70px) rotate(-360deg); opacity: 1; } /* 최종 안착 */
+            /* 2. 구멍에서 바닥으로 툭 떨어짐 */
+            20% { transform: scale(1.2) translate(0px, 70px) rotate(-120deg); opacity: 1; }
+            /* 3. 왼쪽(캡쳐하신 넓은 영역)을 향해 통통 튀어감 */
+            45% { transform: scale(1.2) translate(-40px, 50px) rotate(-200deg); }
+            65% { transform: scale(1.2) translate(-80px, 80px) rotate(-280deg); }
+            85% { transform: scale(1.2) translate(-110px, 70px) rotate(-320deg); }
+            /* 4. 캡쳐하신 영역 한가운데 안착 */
+            100% { transform: scale(1.2) translate(-130px, 80px) rotate(-360deg); opacity: 1; }
         }
     </style>
 </head>
@@ -174,7 +180,6 @@
                 resultImg.src = capsuleImages[winIdx];
                 resultImg.style.display = 'block';
                 
-                // 애니메이션 호출 부분 수정됨 (ease-out을 추가하여 끝으로 갈수록 부드럽게 감속)
                 resultImg.style.animation = 'rollOut 1.2s ease-out forwards';
 
                 setTimeout(() => {
