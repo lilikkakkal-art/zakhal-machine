@@ -30,7 +30,7 @@
             pointer-events: none; /* 기본적으로 클릭 무시 */
         }
 
-        /* 1. 배경 본체 (기준점이 되므로 left 0, top 0) */
+        /* 1단계 (맨 아래): 배경 본체 */
         .base { 
             z-index: 1; 
             left: 0px;
@@ -39,50 +39,10 @@
             height: 704px;
         }
 
-        /* 2. 스크린 영역 (블랙박스) - 클릭해서 이미지 등록, 결과 표시 */
-        /* 피그마 W 233 H 296 / X 710 Y 190 (본체좌표 빼기 적용) */
-        .screen-area {
-            position: absolute;
-            z-index: 2;
-            background-color: black;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            cursor: pointer;
-            pointer-events: auto;
-            overflow: hidden;
-            
-            /* (X: 710 - 693), (Y: 190 - 160) */
-            left: 17px;  
-            top: 30px;   
-            width: 233px; 
-            height: 296px;
-        }
-        .screen-area:hover { background-color: #222; }
-        
-        #result-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-
-        /* 3. 스크린 덮개 (image.png) */
-        /* 스크린 영역과 동일한 크기와 위치 */
-        .screen-mask { 
-            z-index: 3; 
-            left: 17px;  
-            top: 30px;   
-            width: 233px; 
-            height: 296px;
-        }
-
-        /* 4. 가챠 캡슐 굴러가는 애니메이션 영역 (투명창 위치에 맞춤) */
+        /* 2단계: 가챠 캡슐 굴러가는 애니메이션 영역 (창문 뒤에 있어야 함) */
         .capsule-window {
             position: absolute;
-            z-index: 4;
+            z-index: 2;
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -107,29 +67,24 @@
             100% { transform: translateY(50px) rotate(360deg); opacity: 0; }
         }
 
-        /* 5. 투명창 (up.png) */
-        /* 피그마 W 357 H 295 / X 695 Y 192 */
+        /* 3단계: 투명창 (up.png) */
         .window-overlay { 
-            z-index: 5; 
-            
-            /* (X: 695 - 693), (Y: 192 - 160) */
+            z-index: 3; 
             left: 2px;
             top: 32px;
             width: 357px;
             height: 295px;
         }
 
-        /* 6. 핸들 (handle.png) */
-        /* 피그마 W 90 H 91 / X 795 Y 569 */
+        /* 4단계: 핸들 (handle.png) */
         .handle {
             position: absolute;
-            z-index: 6;
+            z-index: 4;
             pointer-events: auto;
             cursor: pointer;
             transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
             transform-origin: center center; 
             
-            /* (X: 795 - 693), (Y: 569 - 160) */
             left: 102px; 
             top: 409px;  
             width: 90px; 
@@ -138,20 +93,49 @@
         .handle.spin {
             transform: rotate(360deg);
         }
+
+        /* 5단계: 스크린 영역 (블랙박스) - 클릭해서 이미지 등록, 결과 표시 */
+        .screen-area {
+            position: absolute;
+            z-index: 5;
+            background-color: black;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            pointer-events: auto;
+            overflow: hidden;
+            
+            left: 17px;  
+            top: 30px;   
+            width: 233px; 
+            height: 296px;
+        }
+        .screen-area:hover { background-color: #222; }
+        
+        #result-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        /* 6단계 (맨 위): 스크린 덮개 프레임 (image.png) */
+        .screen-mask { 
+            z-index: 6; 
+            left: 17px;  
+            top: 30px;   
+            width: 233px; 
+            height: 296px;
+        }
     </style>
 </head>
 <body>
 
     <div class="machine-container">
         <img src="https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/base.png" class="layer base" alt="본체">
-
-        <div class="screen-area" id="screen-btn" title="클릭해서 이미지를 여러장 등록하세요!">
-            <div id="screen-text">클릭해서<br>메인 이미지 등록</div>
-            <img id="result-img" src="" alt="결과 이미지">
-            <input type="file" id="image-upload" multiple accept="image/*" style="display: none;">
-        </div>
-
-        <img src="https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/image.png" class="layer screen-mask" alt="스크린 마스크">
 
         <div class="capsule-window">
             <div class="capsule" id="capsule"></div>
@@ -160,6 +144,14 @@
         <img src="https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/up.png" class="layer window-overlay" alt="투명창">
 
         <img src="https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/handle.png" class="handle" id="handle" alt="핸들">
+
+        <div class="screen-area" id="screen-btn" title="클릭해서 이미지를 여러장 등록하세요!">
+            <div id="screen-text">클릭해서<br>메인 이미지 등록</div>
+            <img id="result-img" src="" alt="결과 이미지">
+            <input type="file" id="image-upload" multiple accept="image/*" style="display: none;">
+        </div>
+
+        <img src="https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/image.png" class="layer screen-mask" alt="스크린 마스크">
     </div>
 
     <script>
