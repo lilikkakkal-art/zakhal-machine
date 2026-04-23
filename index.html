@@ -95,17 +95,26 @@
         .window-overlay { z-index: 5; }
 
         /* 6. 핸들 (handle.png) */
-        .handle {
-            z-index: 6;
-            pointer-events: auto; /* 클릭 가능하게 */
-            cursor: pointer;
-            transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
-            /* 주의: transform-origin은 이미지 전체 캔버스에서 실제 핸들의 중앙점 비율을 찾아 맞춰야 합니다 */
-            transform-origin: 58% 62%; 
-        }
-        .handle.spin {
-            transform: rotate(360deg);
-        }
+.handle {
+    position: absolute;
+    
+    /* 여기서부터 중요! 크기와 위치를 기계에 맞게 조절해주세요 */
+    width: 100px;  /* 핸들의 가로 크기 */
+    height: 100px; /* 핸들의 세로 크기 */
+    top: 55%;      /* 위에서부터 얼마나 내려올지 */
+    left: 58%;     /* 왼쪽에서 얼마나 떨어질지 */
+    
+    z-index: 6;
+    pointer-events: auto; /* 클릭 가능하게 */
+    cursor: pointer;
+    transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+    
+    /* 이미지가 딱 핸들 모양이므로, 도는 중심축은 정가운데로 맞춥니다 */
+    transform-origin: center center; 
+}
+.handle.spin {
+    transform: rotate(360deg);
+}
     </style>
 </head>
 <body>
@@ -127,7 +136,7 @@
 
         <img src="https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/up.png" class="layer window-overlay" alt="투명창">
 
-        <img src="https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/handle.png" class="layer handle" id="handle" alt="핸들">
+        <img src="https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/handle.png" class="handle" id="handle" alt="핸들">
     </div>
 
     <script>
