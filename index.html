@@ -15,35 +15,34 @@
             font-family: 'Malgun Gothic', sans-serif;
         }
 
-        /* 가챠 머신 전체 컨테이너 */
+        /* 1. 가챠 머신 전체 컨테이너 (본체 크기와 동일하게 설정) */
         .machine-container {
             position: relative;
-            width: 600px; /* 제공된 이미지 크기에 맞춰 조절하세요 */
-            height: 800px;
+            width: 415px;  /* 본체 W */
+            height: 704px; /* 본체 H */
             overflow: hidden;
+            margin: 0 auto;
         }
 
-        /* 공통 레이어 속성 */
+        /* 공통 레이어 속성 (100% 꽉 채우기 삭제) */
         .layer {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; /* 기본적으로 클릭 무시 (필요한 요소만 활성화) */
+            pointer-events: none; /* 기본적으로 클릭 무시 */
         }
 
-        /* 1. 배경 본체 */
-        .base { z-index: 1; }
+        /* 1. 배경 본체 (기준점이 되므로 left 0, top 0) */
+        .base { 
+            z-index: 1; 
+            left: 0px;
+            top: 0px;
+            width: 415px;
+            height: 704px;
+        }
 
         /* 2. 스크린 영역 (블랙박스) - 클릭해서 이미지 등록, 결과 표시 */
+        /* 피그마 W 233 H 296 / X 710 Y 190 (본체좌표 빼기 적용) */
         .screen-area {
             position: absolute;
-            /* 아래의 top, left, width, height는 실제 본체의 검은 화면 영역에 맞게 수치를 수정해주세요 */
-            top: 22%; 
-            left: 49.5%; 
-            width: 25%; 
-            height: 25%;
             z-index: 2;
             background-color: black;
             color: white;
@@ -52,8 +51,14 @@
             align-items: center;
             text-align: center;
             cursor: pointer;
-            pointer-events: auto; /* 클릭 가능하게 */
+            pointer-events: auto;
             overflow: hidden;
+            
+            /* (X: 710 - 693), (Y: 190 - 160) */
+            left: 17px;  
+            top: 30px;   
+            width: 233px; 
+            height: 296px;
         }
         .screen-area:hover { background-color: #222; }
         
@@ -61,28 +66,39 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: none; /* 초기에는 숨김 */
+            display: none;
         }
 
         /* 3. 스크린 덮개 (image.png) */
-        .screen-mask { z-index: 3; }
+        /* 스크린 영역과 동일한 크기와 위치 */
+        .screen-mask { 
+            z-index: 3; 
+            left: 17px;  
+            top: 30px;   
+            width: 233px; 
+            height: 296px;
+        }
 
-        /* 4. 가챠 캡슐 굴러가는 애니메이션 영역 */
+        /* 4. 가챠 캡슐 굴러가는 애니메이션 영역 (투명창 위치에 맞춤) */
         .capsule-window {
             position: absolute;
-            top: 50%; left: 54%;
-            width: 18%; height: 15%;
             z-index: 4;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
+            
+            /* 투명창과 동일한 위치 */
+            left: 2px;
+            top: 32px;
+            width: 357px; 
+            height: 295px;
         }
         .capsule {
             width: 40px; height: 40px;
             background: radial-gradient(circle, #ff6b6b 50%, #feca57 50%);
             border-radius: 50%;
-            display: none; /* 평소엔 숨김 */
+            display: none;
             animation: rolling 0.5s infinite linear;
         }
         @keyframes rolling {
@@ -92,29 +108,36 @@
         }
 
         /* 5. 투명창 (up.png) */
-        .window-overlay { z-index: 5; }
+        /* 피그마 W 357 H 295 / X 695 Y 192 */
+        .window-overlay { 
+            z-index: 5; 
+            
+            /* (X: 695 - 693), (Y: 192 - 160) */
+            left: 2px;
+            top: 32px;
+            width: 357px;
+            height: 295px;
+        }
 
         /* 6. 핸들 (handle.png) */
-.handle {
-    position: absolute;
-    
-    /* 여기서부터 중요! 크기와 위치를 기계에 맞게 조절해주세요 */
-    width: 100px;  /* 핸들의 가로 크기 */
-    height: 100px; /* 핸들의 세로 크기 */
-    top: 55%;      /* 위에서부터 얼마나 내려올지 */
-    left: 58%;     /* 왼쪽에서 얼마나 떨어질지 */
-    
-    z-index: 6;
-    pointer-events: auto; /* 클릭 가능하게 */
-    cursor: pointer;
-    transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
-    
-    /* 이미지가 딱 핸들 모양이므로, 도는 중심축은 정가운데로 맞춥니다 */
-    transform-origin: center center; 
-}
-.handle.spin {
-    transform: rotate(360deg);
-}
+        /* 피그마 W 90 H 91 / X 795 Y 569 */
+        .handle {
+            position: absolute;
+            z-index: 6;
+            pointer-events: auto;
+            cursor: pointer;
+            transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+            transform-origin: center center; 
+            
+            /* (X: 795 - 693), (Y: 569 - 160) */
+            left: 102px; 
+            top: 409px;  
+            width: 90px; 
+            height: 91px;
+        }
+        .handle.spin {
+            transform: rotate(360deg);
+        }
     </style>
 </head>
 <body>
@@ -172,32 +195,25 @@
 
         // 3. 핸들 클릭 (가챠 돌리기)
         handle.addEventListener('click', () => {
-            // 이미지가 없으면 경고창
             if (gachaImages.length === 0) {
                 alert("먼저 검은 화면을 클릭해서 가챠용 이미지를 등록해주세요!");
                 return;
             }
-            // 이미 돌아가는 중이면 중복 실행 방지
             if (isSpinning) return;
             isSpinning = true;
 
-            // 핸들 돌리기 애니메이션 클래스 추가
             handle.classList.add('spin');
             
-            // 캡슐 굴러가는 애니메이션 표시
             capsule.style.display = 'block';
             screenText.style.display = 'none';
             resultImg.style.display = 'none';
 
-            // 애니메이션이 끝난 후 (800ms 뒤) 결과 표시
             setTimeout(() => {
-                handle.classList.remove('spin'); // 핸들 원위치
-                capsule.style.display = 'none'; // 캡슐 숨기기
+                handle.classList.remove('spin');
+                capsule.style.display = 'none'; 
 
-                // 랜덤 이미지 선택
                 const randomIndex = Math.floor(Math.random() * gachaImages.length);
                 
-                // 스크린에 이미지 띄우기
                 resultImg.src = gachaImages[randomIndex];
                 resultImg.style.display = 'block';
 
