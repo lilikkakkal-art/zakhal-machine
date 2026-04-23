@@ -12,16 +12,23 @@
             min-height: 100vh;
             background-color: #f4f4f4;
             margin: 0;
+            padding: 20px; /* 모바일 좌우 여백 확보 */
+            box-sizing: border-box;
             font-family: 'Malgun Gothic', sans-serif;
         }
 
         .machine-container {
             position: relative;
-            width: 415px;
-            height: 704px;
+            /* 모바일 대응: 화면보다 크면 줄어들고, 최대 415px까지만 커짐 */
+            width: 100%;
+            max-width: 415px;
+            /* 원본 비율(415:704) 유지 */
+            aspect-ratio: 415 / 704; 
             overflow: hidden;
             margin: 0 auto;
             background: #f4f4f4;
+            /* box-shadow: 0 10px 30px rgba(0,0,0,0.1); */ /* 그림자 삭제 */
+            /* border-radius: 20px; */ /* 외곽선 테두리 삭제 */
         }
 
         .layer {
@@ -29,44 +36,41 @@
             pointer-events: none;
         }
 
-        /* 1단계: 배경 본체 */
         .base { 
             z-index: 1; 
             left: 0; top: 0;
             width: 100%; height: 100%;
+            object-fit: contain;
         }
 
-        /* 2단계: 가챠 캡슐 영역 */
         .capsule-area {
             position: absolute;
             z-index: 2;
-            left: 55px; top: 75px;
-            width: 300px; height: 220px;
+            left: 13.25%; top: 10.65%; /* %로 변환 */
+            width: 72.3%; height: 31.25%;
             overflow: hidden;
         }
 
         .shuffling-capsule {
             position: absolute;
-            width: 50px; height: 50px;
+            width: 15%; height: auto; /* 고정 px에서 %로 */
+            aspect-ratio: 1/1;
             opacity: 0;
         }
 
-        /* 섞이는 애니메이션 */
         @keyframes bounce {
             0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            25% { transform: translate(150px, 50px) rotate(90deg); }
-            50% { transform: translate(80px, 150px) rotate(180deg); }
-            75% { transform: translate(200px, 20px) rotate(270deg); }
+            25% { transform: translate(100%, 50%) rotate(90deg); }
+            50% { transform: translate(50%, 100%) rotate(180deg); }
+            75% { transform: translate(150%, 20%) rotate(270deg); }
         }
 
-        /* 3단계: 투명창 */
         .window-overlay { 
             z-index: 3; 
-            left: 2px; top: 32px;
-            width: 357px; height: 295px;
+            left: 0.5%; top: 4.5%;
+            width: 86%; height: auto;
         }
 
-        /* 4단계: 핸들 */
         .handle {
             position: absolute;
             z-index: 10;
@@ -74,17 +78,16 @@
             cursor: pointer;
             transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
             transform-origin: center center; 
-            left: 102px; top: 409px;  
-            width: 90px; height: 91px;
+            left: 24.5%; top: 58.1%;  
+            width: 21.7%; height: auto;
         }
         .handle.spin { transform: rotate(360deg); }
 
-        /* 5단계: 고정 표지 영역 */
         .cover-area {
             position: absolute;
             z-index: 5;
-            left: 17px; top: 30px;   
-            width: 233px; height: 296px;
+            left: 4.1%; top: 4.2%;   
+            width: 56.1%; height: 42%;
             overflow: hidden;
             background-color: #f4f4f4;
         }
@@ -95,27 +98,23 @@
             object-fit: cover;
         }
 
-        /* 당첨 캡슐 결과창 */
         .result-capsule {
             position: absolute;
             z-index: 100;
-            width: 60px; height: 60px;
-            left: 80px; 
-            top: 540px; 
+            width: 14.5%; height: auto;
+            aspect-ratio: 1/1;
+            left: 19.3%; 
+            top: 76.7%; 
             display: none;
-            transform-origin: center center;
         }
 
-        /* 데굴데굴 속도 업그레이드! */
         @keyframes rollOut {
             0% { transform: scale(0.5) translate(0, 0) rotate(0deg); opacity: 0; }
-            15% { transform: scale(1.2) translate(-10px, 80px) rotate(-90deg); opacity: 1; } 
-            35% { transform: scale(1.2) translate(-35px, 50px) rotate(-180deg); } 
-            55% { transform: scale(1.2) translate(-70px, 80px) rotate(-360deg); } 
-            100% { transform: scale(1.2) translate(-130px, 80px) rotate(-720deg); opacity: 1; } 
+            15% { transform: scale(1.2) translate(-10%, 150%) rotate(-90deg); opacity: 1; } 
+            100% { transform: scale(1.2) translate(-150%, 150%) rotate(-720deg); opacity: 1; } 
         }
 
-        /* 모달 스타일 */
+        /* 모달 스타일 (동일) */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -147,10 +146,8 @@
 
         .close-btn {
             position: absolute;
-            top: -18px;
-            right: -18px;
-            width: 36px;
-            height: 36px;
+            top: -18px; right: -18px;
+            width: 36px; height: 36px;
             background-color: #333;
             color: #fff;
             border-radius: 50%;
@@ -159,14 +156,7 @@
             align-items: center;
             font-size: 20px;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             border: 2px solid #fff;
-            transition: all 0.2s ease;
-        }
-
-        .close-btn:hover {
-            transform: scale(1.1) rotate(90deg);
-            background-color: #000;
         }
 
         @keyframes popIn {
@@ -203,26 +193,16 @@
         const finalGachaImg = document.getElementById('final-gacha-img');
         const closeModalBtn = document.getElementById('close-modal');
 
-// --- 오디오 설정 (딜레이 보정 버전) ---
         const clickSounds = [
-            {
-                audio: new Audio('https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/img/mousses-clikes.mp3'),
-                startTime: 0 // 이 파일은 바로 시작
-            },
-            {
-                audio: new Audio('https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/img/mouse-click-sound.mp3'),
-                startTime: 1.0 // 앞의 1초 공백을 건너뛰고 1초 지점부터 재생
-            }
+            { audio: new Audio('https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/img/mousses-clikes.mp3'), startTime: 0 },
+            { audio: new Audio('https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/img/mouse-click-sound.mp3'), startTime: 1.0 }
         ];
 
         function playRandomClick() {
             const randomIdx = Math.floor(Math.random() * clickSounds.length);
             const selected = clickSounds[randomIdx];
-            const sound = selected.audio;
-
-            // 설정된 시작 시간으로 이동 후 재생
-            sound.currentTime = selected.startTime; 
-            sound.play().catch(e => console.log("오디오 재생 실패:", e));
+            selected.audio.currentTime = selected.startTime; 
+            selected.audio.play().catch(e => console.log("오디오 재생 실패:", e));
         }
 
         const capsuleImages = Array.from({length: 9}, (_, i) => `https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/main/img/gc${i+1}.png`);
@@ -286,30 +266,20 @@
                 const img = document.createElement('img');
                 img.src = capsuleImages[Math.floor(Math.random() * 9)];
                 img.className = 'shuffling-capsule';
-                img.style.left = Math.random() * 250 + 'px';
-                img.style.top = Math.random() * 150 + 'px';
+                img.style.left = Math.random() * 80 + '%';
+                img.style.top = Math.random() * 70 + '%';
                 capsuleBox.appendChild(img);
             }
         }
         initCapsules();
 
-        closeModalBtn.addEventListener('click', () => {
-            resultModal.style.display = 'none';
-        });
-
-        resultModal.addEventListener('click', (e) => {
-            if(e.target === resultModal) {
-                resultModal.style.display = 'none';
-            }
-        });
+        closeModalBtn.addEventListener('click', () => { resultModal.style.display = 'none'; });
+        resultModal.addEventListener('click', (e) => { if(e.target === resultModal) resultModal.style.display = 'none'; });
 
         handle.addEventListener('click', () => {
             if (isSpinning) return;
             isSpinning = true;
-
-            // 딸깍 소리 재생!
             playRandomClick();
-
             handle.classList.add('spin');
             
             const capsules = document.querySelectorAll('.shuffling-capsule');
@@ -320,11 +290,7 @@
 
             setTimeout(() => {
                 handle.classList.remove('spin');
-                
-                capsules.forEach(cap => {
-                    cap.style.animation = 'none';
-                    cap.style.opacity = '0';
-                });
+                capsules.forEach(cap => { cap.style.animation = 'none'; cap.style.opacity = '0'; });
 
                 const winIdx = Math.floor(Math.random() * 9);
                 resultImg.src = capsuleImages[winIdx];
@@ -335,21 +301,14 @@
                     isSpinning = false;
                     resultImg.style.display = 'none';
                     resultImg.style.animation = 'none';
-
                     const randomFinalIdx = Math.floor(Math.random() * finalImages.length);
                     const originalUrl = finalImages[randomFinalIdx];
                     const idMatch = originalUrl.match(/id=([^&]+)/);
                     let safeImageUrl = originalUrl;
-                    
-                    if (idMatch && idMatch[1]) {
-                        safeImageUrl = `https://drive.google.com/thumbnail?id=${idMatch[1]}&sz=w800`;
-                    }
-
+                    if (idMatch && idMatch[1]) safeImageUrl = `https://drive.google.com/thumbnail?id=${idMatch[1]}&sz=w800`;
                     finalGachaImg.src = safeImageUrl;
                     resultModal.style.display = 'flex';
-
                 }, 850); 
-
             }, 600); 
         });
     </script>
