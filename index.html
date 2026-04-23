@@ -10,18 +10,18 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #f4f4f4; /* 본문 배경색 */
+            background-color: #f4f4f4;
             margin: 0;
             font-family: 'Malgun Gothic', sans-serif;
         }
 
         .machine-container {
             position: relative;
-            width: 415px; /* base.png 원본 비율에 맞춰 조정될 수 있음 */
+            width: 415px;
             height: 704px;
             overflow: hidden;
             margin: 0 auto;
-            background: #f4f4f4; /* 배경색 통일 */
+            background: #f4f4f4;
         }
 
         .layer {
@@ -36,11 +36,11 @@
             width: 100%; height: 100%;
         }
 
-        /* 2단계: 가챠 캡슐들이 굴러다니는 영역 (up.png 뒤) */
+        /* 2단계: 가챠 캡슐 영역 */
         .capsule-area {
             position: absolute;
             z-index: 2;
-            left: 55px; top: 75px; /* 투명창 위치에 맞게 조정 필요 */
+            left: 55px; top: 75px;
             width: 300px; height: 220px;
             overflow: hidden;
         }
@@ -51,7 +51,6 @@
             opacity: 0;
         }
 
-        /* 굴러다니는 애니메이션 */
         @keyframes bounce {
             0%, 100% { transform: translate(0, 0) rotate(0deg); }
             25% { transform: translate(150px, 50px) rotate(90deg); }
@@ -59,7 +58,7 @@
             75% { transform: translate(200px, 20px) rotate(270deg); }
         }
 
-        /* 3단계: 투명창 (up.png) - 캡슐 위에 덮임 */
+        /* 3단계: 투명창 */
         .window-overlay { 
             z-index: 3; 
             left: 2px; top: 32px;
@@ -79,37 +78,34 @@
         }
         .handle.spin { transform: rotate(360deg); }
 
-        /* 5단계: 표지 영역 */
+        /* 5단계: 고정 표지 영역 */
         .cover-area {
             position: absolute;
             z-index: 5;
             left: 17px; top: 30px;   
             width: 233px; height: 296px;
-            cursor: pointer;
-            pointer-events: auto;
             overflow: hidden;
-            background-color: #f4f4f4; /* 표지 영역 배경색 통일 */
+            background-color: #f4f4f4;
         }
-        #default-black-bg { 
-            width: 100%; height: 100%; object-fit: cover; 
-            background-color: #f4f4f4; /* 내부 이미지 배경색 통일 */
+        
+        .fixed-cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 리사이징 및 꽉 채움 설정 */
         }
-        #cover-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
-        #cover-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; text-align: center; font-weight: bold; z-index: 6; }
 
         /* 당첨 캡슐 결과창 */
         .result-capsule {
             position: absolute;
             z-index: 100;
             width: 60px; height: 60px;
-            left: 170px; top: 550px; /* 배출구 근처 시작점 */
+            left: 170px; top: 550px;
             display: none;
             transition: all 1s ease-out;
         }
 
-        /* 배출구로 나가는 애니메이션 */
         @keyframes exit {
-            0%, 100% { transform: scale(0.5) translate(0, 0); opacity: 1; }
+            0% { transform: scale(0.5) translate(0, 0); opacity: 1; }
             100% { transform: scale(1.5) translate(-20px, 100px); opacity: 1; }
         }
     </style>
@@ -119,8 +115,7 @@
     <div class="machine-container">
         <img src="https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/main/img/base.png" class="layer base">
 
-        <div class="capsule-area" id="capsule-box">
-            </div>
+        <div class="capsule-area" id="capsule-box"></div>
 
         <img src="https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/main/img/up.png" class="layer window-overlay">
 
@@ -128,11 +123,8 @@
 
         <img id="result-img" class="result-capsule" src="">
 
-        <div class="cover-area" id="cover-btn">
-            <img src="https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/main/img/image.png" id="default-black-bg">
-            <div id="cover-text">클릭해서<br>표지 등록</div>
-            <img id="cover-img" src="">
-            <input type="file" id="image-upload" accept="image/*" style="display: none;">
+        <div class="cover-area">
+            <img src="https://lh3.googleusercontent.com/rd-d/ALs6j_EIbs_ONx7z4w5DlM36HOoNzZTV1LmYJagt6SxONkpwPZc8cEWxLC2S_RqGdTw9jR6C_QwMkWuCTeExnmT07r0i14peJNVoMKlmlE-cs0YlRxeFQJzu0dpxljHIoeq-BhLJhh0hlHEqwSau1FQczV9LkDjWiU4t2k45ljCH5WviK8-r4Y05iyd_iwG8o-o-Tfw2m8_Ud5mVj50yGiWVw7Nodc7OhjQ_0U5j-795X7n_vDNF6BUQIU5BaELhXdfvJa-mPeXuzAyCfbLIkZ5Z7o8XUc8e7-0sTP_2jCxgB3VL1TisKJE1cs24tZNK9t1wqi4iigK1_GL84eG4MmeTlT5sy23ENlKlDK3TJ4hkaGziPVG00RimHR9CW19PO4Za-33wVC_OltdyOrWeZXudk7GYOuXWdyXw9hs52ph3XWTTULloXmoZr3uJeGpC8lC5-6w4x0L_6sorlQQPIRXPN6McIDndDFTdCATU2enUUdCsceTPe76BJ3hH6OowZ4Z-PonPtvwZcabN3Hv3Qwwpu8nbGe-Dp9-yN4saMaVCHv2u2lowTz6Uvs9Bq-EE4W4c6qHj6dqXggho0WnREzHg83mVjx-dmSWvPhPQhHrQuLuDch9ylVdwhzTnbsProE4eAqKVIGnYkuEQOb-my-2mXuYZI4gC4Eha2J6w9rkf5Zz_K40BU3vqWNbsiZb1KXy1b7hiXHfO5lKcuBtyXPKPJpAibZxghUxd_pZYhy5-4bj6PLROkohwaDQ3rAXA4iUC8Iyo5ahKWR1qpxbHXSgOUjjE-Xxy6klG8kEERf-AMKVslGI9W9m1jsPwMnOVZhCdHFJ_uX_rtRC9HiQ3NDwLAIMES0eOVpl9dcPF4Opgz4iVkwvEKbnwg9o15qxscwiqOMltQR58q-m2F03jGJQ0mCS_AZs9hm3hOFpu562ez0jkaaghbnXFCCSX-ceD6OMjTDPCFmjrz_sV5ifMtIXeSWn0Qbh2usvhbj6Lm6ByiVxA6oKqAKzBI8twT1vQ3EGmpH02lDHpZGWwW6MTVAPuki6EfaeCQksFr9J9QqMBJp02LupJuC9o2uKyHLQrxhsNstVTW8Ckn6tRP5w7UtP7IztldDc_1NxUP-ciFymFZZUGq8bBV3lnUbbhcmqYU9e8bCz4cZMXkIB2yE4bQqKx5vQpV-YG7gQQybxd3mWeucAbxVhMEDQbP-5vlJkzfXdkEV91onyManV2R2s3HlQXxRR6vbZm3Q=w1912-h914?auditContext=prefetch" class="fixed-cover-img" alt="표지">
         </div>
     </div>
 
@@ -140,18 +132,14 @@
         const handle = document.getElementById('handle');
         const capsuleBox = document.getElementById('capsule-box');
         const resultImg = document.getElementById('result-img');
-        const fileInput = document.getElementById('image-upload');
-        const coverImg = document.getElementById('cover-img');
-        const coverBtn = document.getElementById('cover-btn');
 
         const capsuleImages = Array.from({length: 9}, (_, i) => `https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/main/img/gc${i+1}.png`);
         
         let isSpinning = false;
 
-        // 초기 캡슐 세팅 (통 안에 미리 넣어두기)
         function initCapsules() {
             capsuleBox.innerHTML = '';
-            for (let i = 0; i < 12; i++) { // 풍성해 보이게 12개 생성
+            for (let i = 0; i < 12; i++) {
                 const img = document.createElement('img');
                 img.src = capsuleImages[Math.floor(Math.random() * 9)];
                 img.className = 'shuffling-capsule';
@@ -162,31 +150,26 @@
         }
         initCapsules();
 
-        // 핸들 클릭 이벤트
         handle.addEventListener('click', () => {
             if (isSpinning) return;
             isSpinning = true;
 
             handle.classList.add('spin');
             
-            // 1. 캡슐 굴러다니기 시작
             const capsules = document.querySelectorAll('.shuffling-capsule');
-            capsules.forEach((cap, idx) => {
+            capsules.forEach((cap) => {
                 cap.style.opacity = '1';
                 cap.style.animation = `bounce ${0.4 + Math.random() * 0.2}s infinite alternate`;
             });
 
-            // 2. 2초간 섞인 후 멈춤 및 당첨 결과 배출
             setTimeout(() => {
                 handle.classList.remove('spin');
                 
-                // 섞이는 애니메이션 정지
                 capsules.forEach(cap => {
                     cap.style.animation = 'none';
                     cap.style.opacity = '0';
                 });
 
-                // 당첨 캡슐 등장
                 const winIdx = Math.floor(Math.random() * 9);
                 resultImg.src = capsuleImages[winIdx];
                 resultImg.style.display = 'block';
@@ -200,17 +183,6 @@
                 }, 1500);
 
             }, 2000);
-        });
-
-        // 표지 등록 로직 유지
-        coverBtn.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                coverImg.src = URL.createObjectURL(file);
-                coverImg.style.display = 'block';
-                document.getElementById('cover-text').style.display = 'none';
-            }
         });
     </script>
 </body>
