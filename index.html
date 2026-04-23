@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사이버 가챠 머신</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+            font-family: 'Malgun Gothic', sans-serif;
+        }
+
+        /* 가챠 머신 전체 컨테이너 */
+        .machine-container {
+            position: relative;
+            width: 600px; /* 제공된 이미지 크기에 맞춰 조절하세요 */
+            height: 800px;
+            overflow: hidden;
+        }
+
+        /* 공통 레이어 속성 */
+        .layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* 기본적으로 클릭 무시 (필요한 요소만 활성화) */
+        }
+
+        /* 1. 배경 본체 */
+        .base { z-index: 1; }
+
+        /* 2. 스크린 영역 (블랙박스) - 클릭해서 이미지 등록, 결과 표시 */
+        .screen-area {
+            position: absolute;
+            /* 아래의 top, left, width, height는 실제 본체의 검은 화면 영역에 맞게 수치를 수정해주세요 */
+            top: 22%; 
+            left: 49.5%; 
+            width: 25%; 
+            height: 25%;
+            z-index: 2;
+            background-color: black;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            pointer-events: auto; /* 클릭 가능하게 */
+            overflow: hidden;
+        }
+        .screen-area:hover { background-color: #222; }
+        
+        #result-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none; /* 초기에는 숨김 */
+        }
+
+        /* 3. 스크린 덮개 (image.png) */
+        .screen-mask { z-index: 3; }
+
+        /* 4. 가챠 캡슐 굴러가는 애니메이션 영역 */
+        .capsule-window {
+            position: absolute;
+            top: 50%; left: 54%;
+            width: 18%; height: 15%;
+            z-index: 4;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .capsule {
+            width: 40px; height: 40px;
+            background: radial-gradient(circle, #ff6b6b 50%, #feca57 50%);
+            border-radius: 50%;
+            display: none; /* 평소엔 숨김 */
+            animation: rolling 0.5s infinite linear;
+        }
+        @keyframes rolling {
+            0% { transform: translateY(-50px) rotate(0deg); }
+            50% { transform: translateY(20px) rotate(180deg); }
+            100% { transform: translateY(50px) rotate(360deg); opacity: 0; }
+        }
+
+        /* 5. 투명창 (up.png) */
+        .window-overlay { z-index: 5; }
+
+        /* 6. 핸들 (handle.png) */
+        .handle {
+            z-index: 6;
+            pointer-events: auto; /* 클릭 가능하게 */
+            cursor: pointer;
+            transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+            /* 주의: transform-origin은 이미지 전체 캔버스에서 실제 핸들의 중앙점 비율을 찾아 맞춰야 합니다 */
+            transform-origin: 58% 62%; 
+        }
+        .handle.spin {
+            transform: rotate(360deg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="machine-container">
+        <img src="https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/base.png" class="layer base" alt="본체">
+
+        <div class="screen-area" id="screen-btn" title="클릭해서 이미지를 여러장 등록하세요!">
+            <div id="screen-text">클릭해서<br>메인 이미지 등록</div>
+            <img id="result-img" src="" alt="결과 이미지">
+            <input type="file" id="image-upload" multiple accept="image/*" style="display: none;">
+        </div>
+
+        <img src="https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/image.png" class="layer screen-mask" alt="스크린 마스크">
+
+        <div class="capsule-window">
+            <div class="capsule" id="capsule"></div>
+        </div>
+
+        <img src="https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/up.png" class="layer window-overlay" alt="투명창">
+
+        <img src="https://raw.githubusercontent.com/lilikkakkal-art/zakhal-machine/refs/heads/main/handle.png" class="layer handle" id="handle" alt="핸들">
+    </div>
+
+    <script>
+        const handle = document.getElementById('handle');
+        const screenBtn = document.getElementById('screen-btn');
+        const fileInput = document.getElementById('image-upload');
+        const screenText = document.getElementById('screen-text');
+        const resultImg = document.getElementById('result-img');
+        const capsule = document.getElementById('capsule');
+
+        let gachaImages = []; // 등록된 이미지들을 저장할 배열
+        let isSpinning = false;
+
+        // 1. 스크린 클릭 시 파일 업로드 창 열기
+        screenBtn.addEventListener('click', () => {
+            if(!isSpinning) fileInput.click();
+        });
+
+        // 2. 파일 업로드 처리 (여러장 등록 가능)
+        fileInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (files.length > 0) {
+                gachaImages = []; // 새로 등록하면 기존 목록 초기화
+                for (let i = 0; i < files.length; i++) {
+                    const fileURL = URL.createObjectURL(files[i]);
+                    gachaImages.push(fileURL);
+                }
+                screenText.innerHTML = `${files.length}장<br>등록 완료!`;
+                resultImg.style.display = 'none';
+                screenText.style.display = 'block';
+            }
+        });
+
+        // 3. 핸들 클릭 (가챠 돌리기)
+        handle.addEventListener('click', () => {
+            // 이미지가 없으면 경고창
+            if (gachaImages.length === 0) {
+                alert("먼저 검은 화면을 클릭해서 가챠용 이미지를 등록해주세요!");
+                return;
+            }
+            // 이미 돌아가는 중이면 중복 실행 방지
+            if (isSpinning) return;
+            isSpinning = true;
+
+            // 핸들 돌리기 애니메이션 클래스 추가
+            handle.classList.add('spin');
+            
+            // 캡슐 굴러가는 애니메이션 표시
+            capsule.style.display = 'block';
+            screenText.style.display = 'none';
+            resultImg.style.display = 'none';
+
+            // 애니메이션이 끝난 후 (800ms 뒤) 결과 표시
+            setTimeout(() => {
+                handle.classList.remove('spin'); // 핸들 원위치
+                capsule.style.display = 'none'; // 캡슐 숨기기
+
+                // 랜덤 이미지 선택
+                const randomIndex = Math.floor(Math.random() * gachaImages.length);
+                
+                // 스크린에 이미지 띄우기
+                resultImg.src = gachaImages[randomIndex];
+                resultImg.style.display = 'block';
+
+                isSpinning = false;
+            }, 800);
+        });
+    </script>
+</body>
+</html>
